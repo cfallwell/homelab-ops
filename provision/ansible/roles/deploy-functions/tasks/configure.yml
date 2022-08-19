@@ -1,0 +1,18 @@
+---
+
+- name: place default-setup.local
+  block:
+    - name: prepare directory
+      file:
+        path: "{{ deploy_functions_templates_dir }}"
+        state: directory
+        owner: "root"
+        group: "root"
+    - name: create default-setup.local
+      template:
+        src: "{{ deploy_functions_default_setup_local_source }}"
+        dest: "{{ deploy_functions_templates_dir }}/default-setup.local"
+        owner: "root"
+        group: "root"
+        mode: 0600
+  when: deploy_functions_place_default_setup_local

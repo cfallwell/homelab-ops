@@ -1,0 +1,50 @@
+---
+- meta: flush_handlers
+
+- name: reboot block
+  block:
+    - name: reboot before tests
+      command: "lxc restart {{ inventory_hostname }} --timeout {{ lxc_reboot_wait_timeout }}"
+      delegate_to: localhost
+      changed_when: false
+
+    - name: wait while rebooting
+      wait_for_connection:
+        delay: "{{ lxc_reboot_wait_delay }}"
+        timeout: "{{ lxc_reboot_wait_timeout }}"
+  when: not ansible_check_mode
+  tags: molecule-idempotence-notest
+
+- name: wait for state=running
+  command: "{{ lxc_reboot_check_command }}"
+  ignore_errors: true
+  register: result
+  retries: "{{ lxc_reboot_check_command_retries }}"
+  delay: "{{ lxc_reboot_check_command_delay }}"
+  until: result is not failed
+  changed_when: false
+
+- name: provide information about degraded services
+  block:
+    - name: copy scripts into server
+      copy:
+        src: files/debug_script.sh
+        dest: /usr/local/sbin/debug_script
+        mode: 0744
+    - name: execute the script
+      command: /usr/local/sbin/debug_script
+      register: debug_output
+    - name: script output
+      debug:
+        var: debug_output.stdout_lines
+    - name: remove the script
+      file:
+        dest: /usr/local/sbin/debug_script
+        state: absent
+  when: result is failed
+
+- name: Notify if system is degraded
+  assert:
+    that:
+      - result.rc == 0
+    fail_msg: "It looks like you have failed services inside of the container.. You should check debug information above and fix the problem(s)."

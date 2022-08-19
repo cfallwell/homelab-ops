@@ -1,0 +1,3 @@
+---
+###set var for worker nodes
+lxd_worker: '{{ ansible_host }}'

@@ -1,0 +1,26 @@
+---
+
+- name: create dirs
+  file:
+    path: "{{ item.dst_dir }}"
+    state: directory
+    mode: "0755"
+  loop: "{{ files }}"
+
+- name: download files
+  get_url:
+    url: "{{ item.url }}"
+    dest: "{{ item.dst_dir }}/{{ item.name }}"
+    mode: "{{ item.mode }}"
+    checksum: "{{ item.checksum }}"
+  loop: "{{ files }}"
+
+- name: install jq
+  apt:
+    name: jq
+    update_cache: true
+    cache_valid_time: 86400
+
+- name: setting installed flag
+  set_fact:
+    deploy_functions_installed: true

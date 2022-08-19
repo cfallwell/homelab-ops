@@ -1,0 +1,6 @@
+---
+lxc_reboot_wait_delay: 5
+lxc_reboot_wait_timeout: 60
+lxc_reboot_check_command: "/bin/systemctl is-system-running"
+lxc_reboot_check_command_delay: 1
+lxc_reboot_check_command_retries: 60

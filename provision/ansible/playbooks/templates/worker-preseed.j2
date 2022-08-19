@@ -1,0 +1,19 @@
+{% if 'server2' in ansible_hostname %} 
+{% set certificate = certificate_server2 -%}
+{% else %}
+{% set certificate = certificate_server3 -%}
+{% endif %}
+
+cluster:
+  server_name: {{ inventory_hostname }}
+  enabled: true
+  member_config:
+  - entity: storage-pool
+    name: local
+    key: source
+    value: ""
+    description: source property for storage pool local
+  cluster_address: server1.lab:8443
+  cluster_certificate:  "{{ certificate }}"
+  server_address: {{ inventory_hostname }}:8443
+

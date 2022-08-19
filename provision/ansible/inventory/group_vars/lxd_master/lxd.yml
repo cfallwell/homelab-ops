@@ -1,0 +1,3 @@
+---
+### Set the var for master host
+lxd_master: '{{ ansible_host }}'

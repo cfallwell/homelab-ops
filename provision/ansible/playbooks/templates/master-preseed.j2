@@ -1,0 +1,17 @@
+config:
+  core.https_address: {{ ansible_host }}:8443
+  images.auto_update_interval: 15
+storage_pools:
+- name: local
+  driver: dir
+profiles:
+- name: default
+  devices:
+    root:
+      path: /
+      pool: local
+      type: disk
+cluster:
+  server_name: {{ inventory_hostname }}
+  enabled: true
+  

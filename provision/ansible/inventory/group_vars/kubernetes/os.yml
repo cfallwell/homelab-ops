@@ -7,19 +7,19 @@ ssh_authorized_keys: ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDOdorMN2jRq08LisRe1qu
 
 packages:
   - ansible
-  - apt-config-auto-update
   - apt-utils
   - hdparm
   - htop
   - intel-gpu-tools
   - ipvsadm
-  - lm_sensors
+  - wmtemp
   - nano
   - zsh
   - nvme-cli
   - socat
   - python3-selinux
   - openssh-server
+  - network-manager
   # TODO(ansible): Might be required for newer Intel CPU generations
   # https://ask.fedoraproject.org/t/intel-graphics-best-practices-and-settings-for-hardware-acceleration/21119
   # - intel-media-driver

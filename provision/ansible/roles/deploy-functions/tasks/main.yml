@@ -1,0 +1,9 @@
+---
+
+- name: install
+  include_tasks: install.yml
+  when: deploy_functions_setup == "full" or deploy_functions_setup == "install"
+
+- name: configure
+  import_tasks: configure.yml
+  when: deploy_functions_setup == "full" or deploy_functions_setup == "configure"
