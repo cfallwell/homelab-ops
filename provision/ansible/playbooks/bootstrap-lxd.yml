@@ -31,19 +31,16 @@
             name: "{{ ansible_ssh_user }}"
             groups: lxd
             append: true
-    - name: Initialize LXD
+    - name: Initialize LXD | LXD init's
       block:
-        - name: Initialize LXD Master | copy master preseed
-          ansible.builtin.template:
-            src: ../playbooks/templates/master_conf.yml.j2
-            dest: ~/master_conf.yml
-            mode: '0644'
-          when: inventory_hostname in groups['lxd-master']
+        - name: Load LXD config
+          set_fact:
+            mconfig: "{{ lookup('template', 'master_conf.yml.j2') }}"
 
-        - name: Initialize LXD | LXD Master Init
-          ansible.builtin.shell:
-            chdir: ~/
-            cmd: lxd init --preseed < master_conf.yml
+        - name: LXD init
+          command: lxd init --preseed <
+          args:
+            stdin: "{{ mconfig }}"
           when: inventory_hostname in groups['lxd-master']
 
         - name: Broadcast the cluster's certificate to the workers
@@ -69,30 +66,23 @@
             stdin: "{{ config }}"
           when: inventory_hostname in groups['lxd-workers']
 
-        # - name: Initialize LXD | Prepare physical network
-        #   command: lxc network create my-net --type=physical parent=br0 --target={{ inventory_hostname }}
-
-        # - name: Initialize LXD | Prepare physical network
-        #   command: lxc network create my-net --type=bridge parent=br0
-        #   when: inventory_hostname in groups['lxd-master']
-
-        # - name: Initialize LXD | Configure Physical network
-        #   command: lxc network create my-net --type=physical
-        #   when: inventory_hostname in groups['lxd-master']
-
-        - name: Create Default Profile
+        - name: Create Kubernetes Profile
           community.general.lxd_profile:
             merge_profile: true
-            name: default
+            name: k3s
             state: present
             config:
-              linux.kernel_modules: rbd,bridge,br_netfilter,ip_tables,ip6_tables,ip_vs,netlink_diag,nf_nat,overlay,xt_conntrack
-              raw.lxc: "lxc.kmsg=1 lxc.apparmor.profile = unconfined\nlxc.cgroup.devices.allow = a\nlxc.mount.auto=proc:rw sys:rw\nlxc.cap.drop = "
+              linux.kernel_modules: rbd,bridge,br_netfilter,ip_tables,ip6_tables,ip_vs,netlink_diag,nf_nat,overlay,xt_conntrack,nc_conntrack,vxlan
+              raw.lxc: "lxc.apparmor.profile = unconfined\nlxc.cgroup.devices.allow = a\nlxc.mount.auto=proc:rw sys:rw\nlxc.cap.drop = "
+              limits.memory.swap: "false"
+              limits.memory: "2GB"
+              limits.cpu: "2"
               security.nesting: "true"
               security.privileged: "true"
-            description: Default LXD Profile
+            description: Kubernetes Profile
             devices:
               root:
                 path: /
                 pool: local
                 type: disk
+          when: inventory_hostname in groups['lxd-master']

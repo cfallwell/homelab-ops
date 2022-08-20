@@ -10,19 +10,20 @@
         seconds: 5
   tasks:
     - name: Create a started container
-      community.general.lxd_container:
-        name: "{{ item }}"
-        ignore_volatile_options: true
-        state: started
-        source:
-          type: image
-          mode: pull
-          server: https://images.linuxcontainers.org
-          protocol: lxd # if you get a 404, try setting protocol: simplestreams
-          alias: fedora/36/default
-        profiles: ["default"]
-        wait_for_ipv4_addresses: true
-        timeout: 600
+      command: lxc launch images:ubunty/jammy "{{ item }}" --profile=k3s --network=br0
+      # community.general.lxd_container:
+      #   name: "{{ item }}"
+      #   ignore_volatile_options: true
+      #   state: started
+      #   source:
+      #     type: image
+      #     mode: pull
+      #     server: https://images.linuxcontainers.org
+      #     protocol: simplestreams # if you get a 404, try setting protocol: simplestreams
+      #     alias: fedora/36/default
+      #   profiles: ["k3s"]
+      wait_for_ipv4_addresses: true
+      timeout: 600
       with_inventory_hostnames:
         - master
         - worker
