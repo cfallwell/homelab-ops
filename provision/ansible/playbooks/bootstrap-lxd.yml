@@ -72,7 +72,7 @@
             name: k3s
             state: present
             config:
-              linux.kernel_modules: rbd,bridge,br_netfilter,ip_tables,ip6_tables,ip_vs,netlink_diag,nf_nat,overlay,xt_conntrack,nc_conntrack,vxlan
+              linux.kernel_modules: rbd,bridge,br_netfilter,ip_tables,ip6_tables,ip_vs,netlink_diag,nf_nat,overlay,xt_conntrack,nf_conntrack,vxlan
               raw.lxc: "lxc.apparmor.profile = unconfined\nlxc.cgroup.devices.allow = a\nlxc.mount.auto=proc:rw sys:rw\nlxc.cap.drop = "
               limits.memory.swap: "false"
               limits.memory: "2GB"
