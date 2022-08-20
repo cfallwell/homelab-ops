@@ -69,12 +69,16 @@
             stdin: "{{ config }}"
           when: inventory_hostname in groups['lxd-workers']
 
-        - name: Initialize LXD | Prepare physical network
-          command: lxc network create my-net --type=physical parent=br0 --target={{ inventory_hostname }}
+        # - name: Initialize LXD | Prepare physical network
+        #   command: lxc network create my-net --type=physical parent=br0 --target={{ inventory_hostname }}
 
-        - name: Initialize LXD | Configure Physical network
-          command: lxc network create my-net --type=physical
+        - name: Initialize LXD | Prepare physical network
+          command: lxc network create my-net --type=bridge parent=br0
           when: inventory_hostname in groups['lxd-master']
+
+        # - name: Initialize LXD | Configure Physical network
+        #   command: lxc network create my-net --type=physical
+        #   when: inventory_hostname in groups['lxd-master']
 
         - name: Create Default Profile
           community.general.lxd_profile:

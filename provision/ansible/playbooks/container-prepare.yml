@@ -9,21 +9,20 @@
       ansible.builtin.pause:
         seconds: 5
   tasks:
-    - name: Provision Virtual Machines
+    - name: Create a started container
       community.general.lxd_container:
-        name: "{{ item }}"
-        type: container
-        state: started
+        name: mycontainer
         ignore_volatile_options: true
+        state: started
         source:
-          protocol: simplestreams
           type: image
           mode: pull
           server: https://images.linuxcontainers.org
+          protocol: lxd # if you get a 404, try setting protocol: simplestreams
           alias: fedora/36/default
         profiles: ["default"]
         wait_for_ipv4_addresses: true
-        timeout: 1200
+        timeout: 600
       with_inventory_hostnames:
         - master
         - worker
