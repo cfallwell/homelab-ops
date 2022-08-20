@@ -1,10 +1,9 @@
 ---
-underlay_subnet: $SUBNET
-cluster_trust_password: "{{ cluster_trust_password }}"
-storage_pool_name: zfs_pool
-zpool_compression: gzip
+underlay_subnet: 172.31.0.0/24
+storage_pool_name: local
+zpool_compression: 
 zpool_type:
-zpool_permissions: $ZPOOL_PERMS
+zpool_permissions: 
 block_devices: /dev/nvme0n1
 # underlay_subnet:
 #	  default: auto.
