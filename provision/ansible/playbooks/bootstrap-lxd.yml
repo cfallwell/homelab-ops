@@ -89,9 +89,10 @@
             description: Default LXD Profile
             devices:
               eth0:
+                nictype: physical
                 parent: my-net
                 type: nic
               root:
                 path: /
-                pool: dir-pool
+                pool: local
                 type: disk

@@ -1,6 +1,6 @@
 ---
 - hosts:
-    - lxd_master
+    - lxd-master
   become: true
   gather_facts: true
   any_errors_fatal: true
@@ -9,20 +9,6 @@
       ansible.builtin.pause:
         seconds: 5
   tasks:
-    - name: Merge a profile
-      community.general.lxd_profile:
-        merge_profile: true
-        name: default
-        state: present
-        config: {}
-        description: Default LXC profile
-        devices:
-          eth0:
-            nictype: physical
-            parent: eno7
-            type: nic
-      run_once: true
-
     - name: Provision Virtual Machines
       community.general.lxd_container:
         name: "{{ item }}"
@@ -39,11 +25,11 @@
         wait_for_ipv4_addresses: true
         timeout: 1200
       with_inventory_hostnames:
-        - vms
-
+        - master
+        - worker
 - hosts:
     - master
-    - worker   
+    - worker
   become: true
   gather_facts: true
   any_errors_fatal: true

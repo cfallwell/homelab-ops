@@ -27,13 +27,13 @@ tasks:
     desc: provision BareMetals
     dir: provision/ansible
     cmds:
-      - ansible-playbook -i {{.ANSIBLE_INVENTORY_DIR}}/metal.yml {{.ANSIBLE_PLAYBOOK_DIR}}/metal-prepare.yml
+      - ansible-playbook -i {{.ANSIBLE_INVENTORY_DIR}}/hosts.yml {{.ANSIBLE_PLAYBOOK_DIR}}/metal-prepare.yml
 
   lxdup:
     desc: Initialize LXD
-    dir: provision/ansible 
+    dir: provision/ansible
     cmds:
-      - ansible-playbook -i {{.ANSIBLE_INVENTORY_DIR}}/lxd_hosts.yml {{.ANSIBLE_PLAYBOOK_DIR}}/bootstrap-lxd.yml
+      - ansible-playbook -i {{.ANSIBLE_INVENTORY_DIR}}/hosts.yml {{.ANSIBLE_PLAYBOOK_DIR}}/bootstrap-lxd.yml
 
   vmup:
     desc: Build the k8s nodes on LXD
@@ -59,7 +59,7 @@ tasks:
     desc: Destroy the VMs
     dir: provision/ansible
     cmds:
-      - ansible-playbook -i {{.ANSIBLE_INVENTORY_DIR}}/lxd_hosts.yml {{.ANSIBLE_PLAYBOOK_DIR}}/vms-nuke.yml
+      - ansible-playbook -i {{.ANSIBLE_INVENTORY_DIR}}/hosts.yml {{.ANSIBLE_PLAYBOOK_DIR}}/vms-nuke.yml
 
   ping:
     desc: Ping all the hosts
