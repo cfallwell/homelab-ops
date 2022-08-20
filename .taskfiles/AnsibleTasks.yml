@@ -23,31 +23,31 @@ tasks:
     cmds:
       - ansible all -i {{.ANSIBLE_INVENTORY_DIR}}/hosts.yml --list-hosts
 
-  metal:
+  metalprep:
     desc: provision BareMetals
     dir: provision/ansible
     cmds:
       - ansible-playbook -i {{.ANSIBLE_INVENTORY_DIR}}/metal.yml {{.ANSIBLE_PLAYBOOK_DIR}}/metal-prepare.yml
 
-  lxd:
+  lxdup:
     desc: Initialize LXD
     dir: provision/ansible 
     cmds:
-      - ansible-playbook -i {{.ANSIBLE_INVENTORY_DIR}}/lxd_hosts.yml {{.ANSIBLE_PLAYBOOK_DIR}}/lxd_provision-master.yml
+      - ansible-playbook -i {{.ANSIBLE_INVENTORY_DIR}}/lxd_hosts.yml {{.ANSIBLE_PLAYBOOK_DIR}}/bootstrap-lxd.yml
 
-  prepare:
-    desc: Prepare all the k8s nodes for running k3s
+  vmup:
+    desc: Build the k8s nodes on LXD
     dir: provision/ansible
     cmds:
-      - ansible-playbook -i {{.ANSIBLE_INVENTORY_DIR}}/hosts.yml {{.ANSIBLE_PLAYBOOK_DIR}}/cluster-prepare.yml
+      - ansible-playbook -i {{.ANSIBLE_INVENTORY_DIR}}/hosts.yml {{.ANSIBLE_PLAYBOOK_DIR}}/container-prepare.yml
 
-  install:
+  clusterinstall:
     desc: Install Kubernetes on the nodes
     dir: provision/ansible
     cmds:
       - ansible-playbook -i {{.ANSIBLE_INVENTORY_DIR}}/hosts.yml {{.ANSIBLE_PLAYBOOK_DIR}}/cluster-installation.yml
 
-  nuke:
+  clusternuke:
     desc: Uninstall Kubernetes on the nodes
     dir: provision/ansible
     interactive: true
@@ -55,7 +55,7 @@ tasks:
       - ansible-playbook -i {{.ANSIBLE_INVENTORY_DIR}}/hosts.yml {{.ANSIBLE_PLAYBOOK_DIR}}/cluster-nuke.yml
       - task: reboot
 
-  vmnuke:
+  vmdown:
     desc: Destroy the VMs
     dir: provision/ansible
     cmds:

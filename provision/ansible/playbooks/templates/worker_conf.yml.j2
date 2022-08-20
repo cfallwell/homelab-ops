@@ -1,0 +1,22 @@
+
+config: {}
+networks: []
+storage_pools: []
+profiles: []
+projects: []
+cluster:
+  server_name: {{ server1.lab }}
+  enabled: true
+  member_config:
+  - entity: storage-pool
+    name: {{ storage_pool_name }}
+    key: source
+    value: {{ storage_pool_name }}
+    description: 'storage pool {{ storage_pool_name }}'
+  cluster_address: {{ hostvars['master'].ansible_default_ipv4.address }}:8443
+  cluster_certificate: |
+    {{ '\n    '.join(hostvars['master'].cert_info.environment.certificate[:-1].split('\n')) }}
+  server_address: {{ ansible_default_ipv4.address }}:8443
+  cluster_password: "{{ cluster_trust_password }}"
+  cluster_certificate_path: ""
+  cluster_token: ""

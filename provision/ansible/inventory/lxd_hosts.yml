@@ -1,10 +1,10 @@
 lxd:
   children:
-    lxd_master:
+    lxd-master:
       hosts:
         server1.lab:
           ansible_host: 172.16.70.10
-    lxd_workers:
+    lxd-workers:
       hosts:
         server2.lab:
           ansible_host: 172.16.70.20

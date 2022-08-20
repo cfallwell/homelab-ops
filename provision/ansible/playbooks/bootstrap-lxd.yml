@@ -1,0 +1,116 @@
+---
+- hosts:
+    - lxd-master
+    - lxd-workers
+  become: true
+  gather_facts: true
+  any_errors_fatal: true
+
+  tasks:
+    - name: Configure LXD
+      block:        
+        - name: remove existing LXD Cluster before Install
+          shell: 'snap remove lxd --purge'
+        - name: update LXD to latest
+          community.general.snap:
+            name: lxd
+            channel: latest
+        - name: Install zfs utilities
+          apt:
+            name: zfsutils-linux
+            state: present
+        - name: Load zfs
+          command: modprobe zfs
+        - name: Enable LXD socket
+          systemd:
+            name: snap.lxd.daemon.unix.socket
+            state: started
+            enabled: yes
+        - name: Add user to LXD group
+          user:
+            name: "{{ ansible_ssh_user }}"
+            groups: lxd
+            append: yes
+        # - name: Block devices
+        #   set_fact:
+        #     disks: "{{ block_devices | join(' ') }}"
+        #     cacheable: true
+        # - name: LXD info | To check if the machine is empty
+        #   command: lxc info
+        #   register: lxc_info_first
+        #   run_once: true
+        #   changed_when: false
+
+    - name: Initialize LXD
+      block:
+        # - name: Create zfs pool
+        #   command: zpool create -f {{ storage_pool_name }} {{ disks }} {{ zpool_type }} -O compression={{ zpool_compression }} -O secondarycache=all
+        #   args:
+        #     creates: /{{ storage_pool_name }}
+
+        # - name: zfs permissions
+        #   command: zfs allow {{ ansible_ssh_user }} {{ zpool_permissions }} {{ storage_pool_name }}
+        #   when: zpool_permissions != ''
+
+        - name: Initialize LXD Master | copy master preseed
+          ansible.builtin.template:
+            src: ../playbooks/templates/master_conf.yml.j2
+            dest: ~/master_conf.yml
+            mode: '0644'
+          when: inventory_hostname in groups['lxd-master']
+        
+        - name: Initialize LXD | LXD Master Init
+          ansible.builtin.shell:
+            chdir: ~/
+            cmd: lxd init --preseed < master_conf.yml
+          when: inventory_hostname in groups['lxd-master']
+        
+        - name: Broadcast the cluster's certificate to the workers
+          block:
+            - name: LXD info
+              command: lxc info
+              register: lxc_info
+              run_once: true
+              changed_when: false
+
+            - name: LXD info fact
+              set_fact:
+                cert_info: "{{ lxc_info.stdout | from_yaml }}"
+                cacheable: yes
+        
+        - name: Initialize LXD | Create physical network
+          command: lxc network create my-net --type=physical parent=br0
+          when: inventory_hostname in groups['lxd-master']
+        
+        - name: Initialize LXD | copy worker preseed
+          ansible.builtin.template:
+            src: ../playbooks/templates/worker_conf.yml.j2
+            dest: ~/worker_conf.yml
+            mode: '0644'
+          when: inventory_hostname in groups['lxd-workers']
+        
+        - name: Initialize LXD | LXD Worker Init
+          ansible.builtin.shell:
+            chdir: ~/
+            cmd: lxd init --preseed < worker_conf.yml
+          when: inventory_hostname in groups['lxd-workers']
+
+        - name: Create Default Profile
+          community.general.lxd_profile:
+            merge_profile: true
+            name: default
+            state: present
+            config: 
+              linux.kernel_modules: rbd,bridge,br_netfilter,ip_tables,ip6_tables,ip_vs,netlink_diag,nf_nat,overlay,xt_conntrack
+              raw.lxc: "lxc.kmsg=1 lxc.aa_profile = unconfined\nlxc.cgroup.devices.allow = a\nlxc.mount.auto=proc:rw sys:rw\nlxc.cap.drop = "
+              security.nesting: "true"
+              security.privileged: "true"
+            description: Default LXD Profile
+            devices:
+              eth0:
+                parent: br0
+                type: nic
+              root:
+                path: /
+                pool: dir-pool
+                type: disk
