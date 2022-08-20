@@ -1,14 +1,26 @@
+config:
+  core.https_address: {{ ansible_default_ipv4.address }}:8443
 cluster:
-server_name: {{ inventory_hostname }}
-enabled: true
-member_config:
-- entity: storage-pool
-  name: local
-  key: source
-  value: ""
-  description: 'storage pool local
-cluster_address: {{ hostvars['server1.lab'].ansible_default_ipv4.address }}:8443
-cluster_certificate: |
+  server_name: {{ inventory_hostname }}
+  enabled: true
+  cluster_address: {{ hostvars['server1.lab'].ansible_default_ipv4.address }}:8443
+  cluster_certificate: |
   {{ '\n    '.join(hostvars['server1.lab'].cert_info.environment.certificate[:-1].split('\n')) }}
-server_address: {{ ansible_default_ipv4.address }}:8443
-cluster_password: joinme
+  cluster_password: joinme
+networks:
+- config:
+  name: my-net
+  key: parent
+    value: br0
+  description: '"parent" property for network "my-net"'
+storage_pools:
+- config:
+    source: ""
+  description: ""
+  name: local
+  driver: dir
+profiles:
+- config: {}
+  description: ""
+  devices: {}
+  name: default
