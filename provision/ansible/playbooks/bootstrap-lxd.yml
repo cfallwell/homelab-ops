@@ -8,7 +8,7 @@
 
   tasks:
     - name: Configure LXD
-      block:        
+      block:
         - name: remove existing LXD Cluster before Install
           shell: 'snap remove lxd --purge'
         - name: update LXD to latest
@@ -31,40 +31,21 @@
             name: "{{ ansible_ssh_user }}"
             groups: lxd
             append: yes
-        # - name: Block devices
-        #   set_fact:
-        #     disks: "{{ block_devices | join(' ') }}"
-        #     cacheable: true
-        # - name: LXD info | To check if the machine is empty
-        #   command: lxc info
-        #   register: lxc_info_first
-        #   run_once: true
-        #   changed_when: false
-
     - name: Initialize LXD
       block:
-        # - name: Create zfs pool
-        #   command: zpool create -f {{ storage_pool_name }} {{ disks }} {{ zpool_type }} -O compression={{ zpool_compression }} -O secondarycache=all
-        #   args:
-        #     creates: /{{ storage_pool_name }}
-
-        # - name: zfs permissions
-        #   command: zfs allow {{ ansible_ssh_user }} {{ zpool_permissions }} {{ storage_pool_name }}
-        #   when: zpool_permissions != ''
-
         - name: Initialize LXD Master | copy master preseed
           ansible.builtin.template:
             src: ../playbooks/templates/master_conf.yml.j2
             dest: ~/master_conf.yml
             mode: '0644'
           when: inventory_hostname in groups['lxd-master']
-        
+
         - name: Initialize LXD | LXD Master Init
           ansible.builtin.shell:
             chdir: ~/
             cmd: lxd init --preseed < master_conf.yml
           when: inventory_hostname in groups['lxd-master']
-        
+
         - name: Broadcast the cluster's certificate to the workers
           block:
             - name: LXD info
@@ -77,30 +58,30 @@
               set_fact:
                 cert_info: "{{ lxc_info.stdout | from_yaml }}"
                 cacheable: yes
-        
-        - name: Initialize LXD | Create physical network
-          command: lxc network create my-net --type=physical parent=br0
+
+        - name: Load LXD config
+          set_fact:
+            config: "{{ lookup('template', 'worker_conf.yml.j2') }}"
+
+        - name: LXD init
+          command: lxd init --preseed <
+          args:
+            stdin: "{{ config }}"
+          when: inventory_hostname in groups['lxd-workers']
+
+        - name: Initialize LXD | Prepare physical network
+          command: lxc network create my-net --type=physical parent=br0 --target={{ inventory_hostname }}
+
+        - name: Initialize LXD | Configure Physical network
+          command: lxc network create my-net --type=physical
           when: inventory_hostname in groups['lxd-master']
-        
-        - name: Initialize LXD | copy worker preseed
-          ansible.builtin.template:
-            src: ../playbooks/templates/worker_conf.yml.j2
-            dest: ~/worker_conf.yml
-            mode: '0644'
-          when: inventory_hostname in groups['lxd-workers']
-        
-        - name: Initialize LXD | LXD Worker Init
-          ansible.builtin.shell:
-            chdir: ~/
-            cmd: lxd init --preseed < worker_conf.yml
-          when: inventory_hostname in groups['lxd-workers']
 
         - name: Create Default Profile
           community.general.lxd_profile:
             merge_profile: true
             name: default
             state: present
-            config: 
+            config:
               linux.kernel_modules: rbd,bridge,br_netfilter,ip_tables,ip6_tables,ip_vs,netlink_diag,nf_nat,overlay,xt_conntrack
               raw.lxc: "lxc.kmsg=1 lxc.aa_profile = unconfined\nlxc.cgroup.devices.allow = a\nlxc.mount.auto=proc:rw sys:rw\nlxc.cap.drop = "
               security.nesting: "true"
@@ -108,7 +89,7 @@
             description: Default LXD Profile
             devices:
               eth0:
-                parent: br0
+                parent: my-net
                 type: nic
               root:
                 path: /
