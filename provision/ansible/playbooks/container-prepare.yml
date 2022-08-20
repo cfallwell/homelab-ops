@@ -10,8 +10,7 @@
         seconds: 5
   tasks:
     - name: Create a started container
-      command: lxc launch images:ubunty/jammy "{{ item }}" --profile=k3s --network=br0
-      wait_for_ipv4_addresses: true
+      command: lxc launch images:ubuntu/jammy "{{ item }}" --profile=k3s --network=br0
       timeout: 600
       with_inventory_hostnames:
         - master
