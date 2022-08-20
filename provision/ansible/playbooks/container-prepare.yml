@@ -11,7 +11,7 @@
   tasks:
     - name: Create a started container
       community.general.lxd_container:
-        name: mycontainer
+        name: "{{ item }}"
         ignore_volatile_options: true
         state: started
         source:

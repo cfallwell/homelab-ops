@@ -25,12 +25,12 @@
           systemd:
             name: snap.lxd.daemon.unix.socket
             state: started
-            enabled: yes
-        - name: Add user to LXD group
+            enabled: true
+        - name: Add usere to LXD group
           user:
             name: "{{ ansible_ssh_user }}"
             groups: lxd
-            append: yes
+            append: true
     - name: Initialize LXD
       block:
         - name: Initialize LXD Master | copy master preseed
@@ -57,7 +57,7 @@
             - name: LXD info fact
               set_fact:
                 cert_info: "{{ lxc_info.stdout | from_yaml }}"
-                cacheable: yes
+                cacheable: true
 
         - name: Load LXD config
           set_fact:
@@ -72,9 +72,9 @@
         # - name: Initialize LXD | Prepare physical network
         #   command: lxc network create my-net --type=physical parent=br0 --target={{ inventory_hostname }}
 
-        - name: Initialize LXD | Prepare physical network
-          command: lxc network create my-net --type=bridge parent=br0
-          when: inventory_hostname in groups['lxd-master']
+        # - name: Initialize LXD | Prepare physical network
+        #   command: lxc network create my-net --type=bridge parent=br0
+        #   when: inventory_hostname in groups['lxd-master']
 
         # - name: Initialize LXD | Configure Physical network
         #   command: lxc network create my-net --type=physical
@@ -87,15 +87,11 @@
             state: present
             config:
               linux.kernel_modules: rbd,bridge,br_netfilter,ip_tables,ip6_tables,ip_vs,netlink_diag,nf_nat,overlay,xt_conntrack
-              raw.lxc: "lxc.kmsg=1 lxc.aa_profile = unconfined\nlxc.cgroup.devices.allow = a\nlxc.mount.auto=proc:rw sys:rw\nlxc.cap.drop = "
+              raw.lxc: "lxc.kmsg=1 lxc.apparmor.profile = unconfined\nlxc.cgroup.devices.allow = a\nlxc.mount.auto=proc:rw sys:rw\nlxc.cap.drop = "
               security.nesting: "true"
               security.privileged: "true"
             description: Default LXD Profile
             devices:
-              eth0:
-                nictype: physical
-                parent: my-net
-                type: nic
               root:
                 path: /
                 pool: local
