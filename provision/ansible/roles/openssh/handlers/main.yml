@@ -1,0 +1,7 @@
+---
+# handlers file for openssh-server
+
+- name: restart_sshd
+  service:
+    name: "{{ sshd_service_name }}"
+    state: reloaded

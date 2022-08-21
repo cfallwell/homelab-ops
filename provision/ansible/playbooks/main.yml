@@ -1,0 +1,18 @@
+---
+- hosts:
+    - all
+  become: true
+  gather_facts: true
+  any_errors_fatal: false
+  tasks:
+    - name: Prepare Bare Metal
+      ansible.builtin.import_playbook: metal-prepare.yml
+
+    - name: Bootstrap LXF
+      ansible.builtin.import_playbook: bootstrap-lxd.yml
+
+    - name: Prepare Containers
+      ansible.builtin.import_playbook: container-prepare.yml
+
+  # - name: Deploy Kubernetes
+  #   ansible.builtin.import_playbook: cluster-installation.yml

@@ -23,6 +23,12 @@ tasks:
     cmds:
       - ansible all -i {{.ANSIBLE_INVENTORY_DIR}}/hosts.yml --list-hosts
 
+  godmode:
+    dssc: Do it all
+    dir: provision/ansible
+    cmds:
+      - ansible-playbook -i {{.ANSIBLE_INVENTORY_DIR}}/hosts.yml {{.ANSIBLE_PLAYBOOK_DIR}}/main.yml
+
   metalprep:
     desc: provision BareMetals
     dir: provision/ansible
@@ -40,6 +46,12 @@ tasks:
     dir: provision/ansible
     cmds:
       - ansible-playbook -i {{.ANSIBLE_INVENTORY_DIR}}/hosts.yml {{.ANSIBLE_PLAYBOOK_DIR}}/container-prepare.yml
+
+  ips:
+    desc: Configure IP Addresses
+    dir: provision/ansible
+    cmds:
+      - ansible-playbook -i {{.ANSIBLE_INVENTORY_DIR}}/hosts.yml {{.ANSIBLE_PLAYBOOK_DIR}}/container-ips.yml
 
   clusterinstall:
     desc: Install Kubernetes on the nodes

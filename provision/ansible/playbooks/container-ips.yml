@@ -1,0 +1,36 @@
+---
+- hosts:
+    - metal
+  become: true
+  gather_facts: true
+  any_errors_fatal: false
+  tasks:
+    - name: check for file locations
+      stat:
+        path: /var/snap/lxd/common/lxd/containers/{{ item }}/rootfs/etc/netplan/10-lxc.yaml
+      register: file
+      with_inventory_hostnames:
+        - master
+        - worker
+    - debug:
+        msg: "{{ file }}"
+
+    - name: seed Static IPs
+      ansible.builtin.template:
+        mode: 0644
+        src: ../playbooks/templates//10-lxc.yml.j2
+        dest: /var/snap/lxd/common/lxd/containers/{{ item }}/rootfs/etc/netplan/10-lxc.yaml
+      #when: file.stat.exists
+      with_inventory_hostnames:
+        - master
+        - worker
+      ignore_errors: True
+
+    - name: Restart containers
+      community.general.lxd_container:
+        name: "{{ item }}"
+        state: restarted
+        type: container
+      with_inventory_hostnames:
+        - master
+        - worker

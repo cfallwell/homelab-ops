@@ -16,3 +16,5 @@ roles:
     src: https://oss.help/ansible/pub/roles/d/deploy-functions-stable.tar.gz
   - name: lxc-reboot
     src: https://oss.help/ansible/pub/roles/l/2/lxc-reboot-stable.tar.gz
+  - name: openssh
+    src: archf.openssh-server

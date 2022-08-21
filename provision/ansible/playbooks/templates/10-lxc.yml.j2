@@ -1,0 +1,12 @@
+network:
+    version: 2
+    renderer: networkd
+    ethernets:
+        eth0:
+            addresses:
+                - {{ hostvars[item].ansible_host }}/24
+            nameservers:
+                - 172.16.70.1
+            routes:
+                - to: default
+                  via: 172.16.70.1
