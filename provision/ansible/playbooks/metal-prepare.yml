@@ -92,13 +92,13 @@
           community.general.modprobe:
             name: "{{ item }}"
             state: present
-          loop: [rbd, bridge, br_netfilter, ip_tables, ip6_tables, ip_vs, netlink_diag, nf_nat, overlay, xt_conntrack, nf_conntrack, vxlan]
+          loop: [rbd, bridge, br_netfilter, ip_tables, ip6_tables, ip_vs, netlink_diag, nf_nat, overlay, xt_conntrack, nf_conntrack, vxlan, overlay]
         - name: System Configuration (2) | Enable kernel modules on boot
           ansible.builtin.copy:
             mode: 0644
             content: "{{ item }}"
             dest: "/etc/modules-load.d/{{ item }}.conf"
-          loop: [rbd, bridge, br_netfilter, ip_tables, ip6_tables, ip_vs, netlink_diag, nf_nat, overlay, xt_conntrack, nf_conntrack, vxlan]
+          loop: [rbd, bridge, br_netfilter, ip_tables, ip6_tables, ip_vs, netlink_diag, nf_nat, overlay, xt_conntrack, nf_conntrack, vxlan, overlay]
         - name: System Configuration (2) | Set sysctls
           ansible.posix.sysctl:
             name: "{{ item.key }}"

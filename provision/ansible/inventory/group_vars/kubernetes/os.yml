@@ -28,6 +28,7 @@ packages:
   - python3-selinux
   - openssh-server
   - network-manager
+  - conntrack
   # TODO(ansible): Might be required for newer Intel CPU generations
   # https://ask.fedoraproject.org/t/intel-graphics-best-practices-and-settings-for-hardware-acceleration/21119
   # - intel-media-driver

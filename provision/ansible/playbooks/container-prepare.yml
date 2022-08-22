@@ -8,7 +8,7 @@
     - name: Create a started container
       community.general.lxd_container:
         name: "{{ item }}"
-        ignore_volatile_options: false
+        ignore_volatile_options: true
         state: started
         source:
           type: image
@@ -22,8 +22,10 @@
             parent: "br0"
             type: "nic"
         profiles: ["k3s"]
-        wait_for_ipv4_addresses: true
+        wait_for_ipv4_addresses: false
       timeout: 600
       with_inventory_hostnames:
         - master
         - worker
+      # loop_control:
+      #   pause: 30
