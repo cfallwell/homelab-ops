@@ -8,6 +8,7 @@
     - name: Create a started container
       community.general.lxd_container:
         name: "{{ item }}"
+        type: virtual-machine
         ignore_volatile_options: true
         state: started
         source:
