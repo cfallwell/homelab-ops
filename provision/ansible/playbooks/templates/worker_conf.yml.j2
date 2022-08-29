@@ -12,9 +12,9 @@ cluster:
     key: source
     value: ""
     description: '"source" property for storage pool "local"'
-  cluster_address: {{ hostvars['server1.lab'].ansible_default_ipv4.address }}:8443
+  cluster_address: {{ hostvars['server1'].ansible_default_ipv4.address }}:8443
   cluster_certificate: |
-    {{ '\n    '.join(hostvars['server1.lab'].cert_info.environment.certificate[:-1].split('\n')) }}
+    {{ '\n    '.join(hostvars['server1'].cert_info.environment.certificate[:-1].split('\n')) }}
   server_address: {{ ansible_default_ipv4.address }}:8443
   cluster_password: joinme
   cluster_certificate_path: ""

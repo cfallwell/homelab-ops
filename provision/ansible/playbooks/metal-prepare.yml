@@ -44,7 +44,6 @@
             block: |
               127.0.1.1   {{ inventory_hostname }}
 
-
         - name: System Configuration (2) | Patch Network Boot
           ansible.builtin.copy:
             mode: 0644

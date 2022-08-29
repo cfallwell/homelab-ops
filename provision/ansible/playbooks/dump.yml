@@ -1,0 +1,12 @@
+---
+- hosts: metal
+  become: true
+  gather_facts: true
+  any_errors_fatal: true
+  tasks:
+  - template:
+      src: templates/dump_variables
+      dest: /tmp/ansible_variables
+  - fetch:
+      src: /tmp/ansible_variables
+      dest: "~/homelab/{{inventory_hostname}}_ansible_variables"
