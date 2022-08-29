@@ -9,12 +9,21 @@
   tasks:
     - name: Configure LXD
       block:
+        ### Install LXD
         - name: remove existing LXD Cluster before Install
           shell: 'snap remove lxd --purge'
         - name: update LXD to latest
           community.general.snap:
             name: lxd
             channel: latest
+        ### Install JuJu
+        - name: remove existing LXD Cluster before Install
+          shell: 'snap remove juju --purge'
+        - name: update LXD to latest
+          community.general.snap:
+            name: juju
+            channel: latest
+
         - name: Install zfs utilities
           apt:
             name: zfsutils-linux
