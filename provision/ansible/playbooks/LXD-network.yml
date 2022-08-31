@@ -1,0 +1,54 @@
+---
+- hosts:
+    - lxd-master
+    - lxd-workers
+  become: true
+  gather_facts: true
+  any_errors_fatal: true
+  tasks:
+    - name: Configure Networking
+      block:
+        - name: Configure LXD OVN
+          ansible.builtin.apt:
+            name: ovn-central
+            state: present
+            update_cache: true
+        - name: Configure LXD OVN
+          ansible.builtin.apt:
+            name: ovn-host
+            state: present
+            update_cache: true
+        - name: Configure OVN master
+          ansible.builtin.copy:
+            mode: 0644
+            src: ../playbooks/templates/ovn-central-master.j2
+            dest: /etc/default/ovn-central
+          when: inventory_hostname in groups['lxd-master']
+        - name: Make sure OVN Cental is running
+          ansible.builtin.systemd:
+            state: started
+            name: ovn-central.service
+          when: inventory_hostname in groups['lxd-master']
+        - name: Configure OVN Workers
+          ansible.builtin.copy:
+            mode: 0644
+            src: ../playbooks/templates/ovn-central-worker.j2
+            dest: /etc/default/ovn-central
+          when: inventory_hostname in groups['lxd-workers']
+        - name: Make sure OVN Host is running
+          ansible.builtin.systemd:
+            state: started
+            name: ovn-host.service
+          when: inventory_hostname in groups['lxd-workers']
+        - name: Configure ovs-switches
+          ansible.builtin.command:
+            cmd: ovs-vsctl set open_vswitch . external_ids:ovn-remote=tcp:10.15.20.10:6642,tcp:10.15.20.20:6642,tcp:10.15.20.30:6642 external_ids:ovn-encap-type=geneve external_ids:ovn-encap-ip="{{ hostvars[inventory_hostname].eno1_host }}"
+        - name: Configure Uplink Interface
+          ansible.builtin.shell: |
+            lxc network create UPLINK --type=physical parent=br0 --target=server1\n
+            lxc network create UPLINK --type=physical parent=br0 --target=server2\n
+            lxc network create UPLINK --type=physical parent=br0 --target=server3\n
+            lxc network create UPLINK --type=physical \
+            ipv4.ovn.ranges=10.15.20.1-10.15.20.250 \
+            ipv4.gateway=10.15.20.1 \
+            dns.nameservers=10.15.20.1\n

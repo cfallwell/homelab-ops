@@ -19,11 +19,10 @@
           alias: base
         devices:
           eth0:
-            nictype: "bridged"
-            parent: "br0"
+            network: "ovn"
             type: "nic"
         profiles: ["k3s"]
-        wait_for_ipv4_addresses: false
+        wait_for_ipv4_addresses: true
       timeout: 600
       with_inventory_hostnames:
         - master

@@ -15,9 +15,3 @@ network:
             dhcp6: yes
             interfaces:
                 - eno7
-        br1:
-            macaddress: {{ hostvars[inventory_hostname].ansible_eno1.macaddress }}
-            addresses: {{ hostvars[inventory_hostname].eno1_host }}
-            dhcp6: no
-            interfaces:
-                - eno1

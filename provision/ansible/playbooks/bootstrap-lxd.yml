@@ -5,7 +5,6 @@
   become: true
   gather_facts: true
   any_errors_fatal: true
-
   tasks:
     - name: Configure LXD
       block:
@@ -16,14 +15,6 @@
           community.general.snap:
             name: lxd
             channel: latest
-        ### Install JuJu
-        - name: remove existing LXD Cluster before Install
-          shell: 'snap remove juju --purge'
-        - name: update LXD to latest
-          community.general.snap:
-            name: juju
-            channel: latest
-
         - name: Install zfs utilities
           apt:
             name: zfsutils-linux
@@ -45,13 +36,11 @@
         - name: Load LXD config
           set_fact:
             mconfig: "{{ lookup('template', 'master_conf.yml.j2') }}"
-
         - name: LXD init
           command: lxd init --preseed <
           args:
             stdin: "{{ mconfig }}"
           when: inventory_hostname in groups['lxd-master']
-
         - name: Broadcast the cluster's certificate to the workers
           block:
             - name: LXD info
@@ -59,22 +48,18 @@
               register: lxc_info
               run_once: true
               changed_when: false
-
             - name: LXD info fact
               set_fact:
                 cert_info: "{{ lxc_info.stdout | from_yaml }}"
                 cacheable: true
-
         - name: Load LXD config
           set_fact:
             config: "{{ lookup('template', 'worker_conf.yml.j2') }}"
-
         - name: LXD init
           command: lxd init --preseed <
           args:
             stdin: "{{ config }}"
           when: inventory_hostname in groups['lxd-workers']
-
         - name: Create Kubernetes Profile
           community.general.lxd_profile:
             merge_profile: true
